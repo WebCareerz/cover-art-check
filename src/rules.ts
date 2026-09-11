@@ -81,7 +81,9 @@ const FORBIDDEN_TEXT: Array<{ kind: ForbiddenKind; pattern: RegExp; what: string
   { kind: 'year', pattern: /\b(?:19|20)\d{2}\b/, what: 'a year' },
   { kind: 'price', pattern: /[$€£]\s?\d|\b\d+(?:\.\d{2})?\s?(?:usd|eur|gbp|dollars?)\b/i, what: 'a price' },
   { kind: 'exclusive', pattern: /\bexclusive\b/i, what: 'the word "Exclusive"' },
-  { kind: 'format', pattern: /\b(?:cd|dvd|vinyl|cassette|lp|mp3|digital download)\b/i, what: 'a physical format such as "CD"' },
+  // DistroKid names only "CD" / "Compact Disc"; the other format words are CD Baby's list
+  { kind: 'cd', pattern: /\b(?:cd|compact disc)\b/i, what: 'a physical format such as "CD"' },
+  { kind: 'format', pattern: /\b(?:dvd|vinyl|cassette|lp|mp3|disc|digital download|digital version)\b/i, what: 'a format word such as "vinyl"' },
   { kind: 'barcode', pattern: /\b(?:barcode|upc|isrc|isbn|ean)\b|\b\d{12,13}\b/i, what: 'a barcode or code number' },
   { kind: 'store', pattern: /\b(?:itunes|apple music|spotify|amazon music|youtube music|tidal|deezer|soundcloud)\b/i, what: 'a store or streaming service name' },
   { kind: 'advisory', pattern: /\b(?:parental advisory|explicit content)\b/i, what: 'a Parental Advisory phrase' },

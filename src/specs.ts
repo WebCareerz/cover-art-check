@@ -6,7 +6,7 @@
 export type PlatformId = 'spotify' | 'apple' | 'distrokid' | 'tunecore' | 'cdbaby' | 'bandcamp';
 
 /** What a line of text on the cover can mention that some platform rules out. */
-export type ForbiddenKind = 'url' | 'handle' | 'date' | 'year' | 'price' | 'exclusive' | 'format' | 'barcode' | 'store' | 'advisory' | 'promo';
+export type ForbiddenKind = 'url' | 'handle' | 'date' | 'year' | 'price' | 'exclusive' | 'cd' | 'format' | 'barcode' | 'store' | 'advisory' | 'promo';
 
 export interface PlatformSpec {
   id: PlatformId;
@@ -75,7 +75,7 @@ export const PLATFORMS: readonly PlatformSpec[] = [
     square: 'adjusted',
     formats: ['jpg'],
     colorMode: 'RGB',
-    forbids: ['url', 'handle', 'price', 'format'],
+    forbids: ['url', 'handle', 'price', 'cd'],
     text: 'No web addresses, QR codes, X page names, prices, streaming or social logos, or physical formats such as "CD". Don\'t reuse one image across releases.',
     checked: '2026-09-11',
     sources: ['https://support.distrokid.com/hc/en-us/articles/360013534334-What-Are-the-Requirements-for-Album-Artwork'],
@@ -105,7 +105,7 @@ export const PLATFORMS: readonly PlatformSpec[] = [
     minDpi: 72,
     maxDpi: 300,
     maxMegabytes: 25,
-    forbids: ['url', 'handle', 'price', 'barcode', 'format', 'exclusive', 'promo'],
+    forbids: ['url', 'handle', 'price', 'barcode', 'cd', 'format', 'exclusive', 'promo'],
     text: 'Any text must match the release details exactly. No web addresses, handles, contact details, prices, barcodes or QR codes, physical formats, exclusivity claims, or time-bound words such as "new".',
     checked: '2026-09-11',
     sources: [

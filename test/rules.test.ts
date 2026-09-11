@@ -186,6 +186,12 @@ describe('text', () => {
   ])('flags %s as %s', (text, what) => {
     expect(findForbiddenText(text)?.what).toBe(what);
   });
+  it('DistroKid names only "CD"; vinyl and other format words come from CD Baby\'s list', () => {
+    expect(findForbiddenText('Vinyl edition')?.what).toBe('a format word such as "vinyl"');
+    expect(checkText(input({ platforms: ['distrokid'], text: [{ text: 'Limited CD edition' }] })).level).toBe('fail');
+    expect(checkText(input({ platforms: ['distrokid'], text: [{ text: 'Vinyl edition' }] })).level).toBe('warn');
+    expect(checkText(input({ platforms: ['cdbaby'], text: [{ text: 'Vinyl edition' }] })).level).toBe('fail');
+  });
   it('allows ordinary titles and release details', () => {
     for (const text of ['Midnight Vending Machine', 'Room 302', 'Velvet, Still Wet', 'feat. Neon Quiet · EP']) expect(findForbiddenText(text)).toBeNull();
   });
