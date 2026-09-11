@@ -1,5 +1,6 @@
 {
   "name": "cover-art-check",
   "version": "1.0.0",
-  "description": "A tool to check cover art for music albums."
+  "description": "A tool to check cover art for music albums.",
+  "license": "MIT"
 }
