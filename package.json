@@ -1,6 +1,6 @@
 {
   "name": "cover-art-check",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Check album cover art against the published artwork rules of Spotify, Apple Music, DistroKid, TuneCore, CD Baby and Bandcamp.",
   "keywords": [
     "album-art",
