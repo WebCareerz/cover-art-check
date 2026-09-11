@@ -50,7 +50,7 @@
       "url",
       "handle",
       "price",
-      "format"
+      "cd"
     ],
     "text": "No web addresses, QR codes, X page names, prices, streaming or social logos, or physical formats such as \"CD\". Don't reuse one image across releases.",
     "checked": "2026-09-11",
@@ -98,6 +98,7 @@
       "handle",
       "price",
       "barcode",
+      "cd",
       "format",
       "exclusive",
       "promo"
