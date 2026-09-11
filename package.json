@@ -1,6 +1,67 @@
 {
   "name": "cover-art-check",
-  "version": "1.0.0",
-  "description": "A tool to check cover art for music albums.",
-  "license": "MIT"
+  "version": "0.1.0",
+  "description": "Check album cover art against the published artwork rules of Spotify, Apple Music, DistroKid, TuneCore, CD Baby and Bandcamp.",
+  "keywords": [
+    "album-art",
+    "cover-art",
+    "album-cover",
+    "artwork",
+    "distrokid",
+    "tunecore",
+    "cd-baby",
+    "spotify",
+    "apple-music",
+    "bandcamp",
+    "music-distribution",
+    "preflight"
+  ],
+  "license": "MIT",
+  "author": "WebCareerz",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WebCareerz/cover-art-check.git"
+  },
+  "homepage": "https://github.com/WebCareerz/cover-art-check#readme",
+  "bugs": "https://github.com/WebCareerz/cover-art-check/issues",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "default": "./dist/node.js"
+    },
+    "./specs.json": "./specs.json",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "cover-art-check": "./dist/cli.js"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "files": [
+    "dist",
+    "specs.json"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc && node scripts/write-specs.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "dependencies": {
+    "sharp": "^0.35.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.2",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.0"
+  }
 }
