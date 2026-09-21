@@ -16,8 +16,12 @@ export interface PixelStats {
   colorEntropy: number;
   /** fraction of pixels that are edges 0..1 */
   edgeDensity: number;
-  /** a photo-paper / print frame: where the strongest luminance step sits on each side (fraction from that edge) and how strong it is (0..255) */
-  frame?: { top: number; right: number; bottom: number; left: number; strength: number };
+  /**
+   * a photo-paper / print frame: where the strongest luminance step sits on each side (fraction from that edge), how
+   * strong it is (0..255) and whether all four sides step the same way (a paper frame does; a subject that merely sits
+   * in the middle of the picture does not)
+   */
+  frame?: { top: number; right: number; bottom: number; left: number; strength: number; sameDirection?: boolean };
 }
 
 function colorAt(img: Rgba, x: number, y: number): [number, number, number] {
@@ -98,6 +102,11 @@ export function edgeDensity(img: Rgba, threshold = 40): number {
  * average each row / column into one luminance value, walk inwards from every edge over the outer 20 %, and take the
  * strongest luminance step between 2 % and 18 % in. A print border shows a strong step at about the same depth on all
  * four sides; a normal photo has its strongest step anywhere and only on some sides.
+ *
+ * `sameDirection` says whether all four steps go the same way (the picture gets brighter — or darker — going inwards).
+ * A sheet of photo paper is one colour all the way round, so it does; a bright panel inside the picture does not.
+ * Measured on a false positive (2026-09-21): a blank billboard against an open sky stepped +89 / +64 / +68 on three
+ * sides, and the fourth "side" was a barbed wire crossing the sky at a similar depth, stepping -79.
  */
 export function frameInset(img: Rgba): NonNullable<PixelStats['frame']> {
   const luma = (x: number, y: number) => {
@@ -124,23 +133,34 @@ export function frameInset(img: Rgba): NonNullable<PixelStats['frame']> {
     const { out, n } = profile(side);
     let best = 0;
     let at = 0;
+    let signed = 0;
     const lo = Math.max(2, Math.floor(n * 0.02));
     const hi = Math.min(out.length - 3, Math.floor(n * 0.18));
     for (let d = lo; d < hi; d += 1) {
       // step across a 3-line window so a slightly tilted edge still registers
-      const step = Math.abs((out[d + 2]! + out[d + 1]!) / 2 - (out[d - 1]! + out[d - 2]!) / 2);
+      const delta = (out[d + 2]! + out[d + 1]!) / 2 - (out[d - 1]! + out[d - 2]!) / 2;
+      const step = Math.abs(delta);
       if (step > best) {
         best = step;
         at = d;
+        signed = delta;
       }
     }
-    return { inset: at / n, strength: best };
+    return { inset: at / n, strength: best, inward: Math.sign(signed) };
   };
   const t = strongest('top');
   const r = strongest('right');
   const b = strongest('bottom');
   const l = strongest('left');
-  return { top: t.inset, right: r.inset, bottom: b.inset, left: l.inset, strength: Math.min(t.strength, r.strength, b.strength, l.strength) };
+  const inward = [t, r, b, l].map((x) => x.inward);
+  return {
+    top: t.inset,
+    right: r.inset,
+    bottom: b.inset,
+    left: l.inset,
+    strength: Math.min(t.strength, r.strength, b.strength, l.strength),
+    sameDirection: inward.every((d) => d !== 0 && d === inward[0]),
+  };
 }
 
 export function pixelStats(img: Rgba): PixelStats {

@@ -15,6 +15,7 @@ import {
   edgeDensity,
   findForbiddenText,
   frameInset,
+  FRAME_STEP_MIN,
   pixelStats,
   runPreflight,
   summarize,
@@ -313,6 +314,32 @@ describe('print-frame detection (a shaded photo-paper border is not a uniform ba
     const img = framed(256, 0);
     expect(frameInset(img).strength).toBeLessThan(40);
     expect(checkBorder(input({ pixel: pixelStats(img) })).level).toBe('pass');
+  });
+
+  /**
+   * A billboard, a poster or a lit window inside the picture has edges at a similar depth too. What a paper frame has
+   * and a subject does not: the same step direction on all four sides, at nearly the same depth. The shape below is a
+   * cover that was wrongly flagged (2026-09-21): a blank panel against an open sky, a wire across the lower fifth.
+   */
+  const billboard = (size: number) =>
+    image(size, size, (x, y) => {
+      const fx = x / size;
+      const fy = y / size;
+      const onPanel = fy >= 0.11 && fy <= 0.79 && fx >= 0.14 && fx <= 0.86;
+      const v = onPanel ? 236 : Math.abs(y - Math.round(size * 0.836)) <= 1 ? 40 : 150 - Math.round(fy * 35);
+      return [v, v, v] as [number, number, number];
+    });
+  it('a bright panel in the picture with a dark line near one edge is not a frame', () => {
+    const f = frameInset(billboard(512));
+    expect(f.strength).toBeGreaterThan(FRAME_STEP_MIN); // every side does show a strong step
+    expect(f.sameDirection).toBe(false); // but one of them steps the other way
+    expect(checkBorder(input({ pixel: pixelStats(billboard(512)) })).level).toBe('pass');
+  });
+  it('four sides that step the same way but at different depths are not one frame', () => {
+    const pixel = { borderFraction: { top: 0, right: 0, bottom: 0, left: 0 }, colorEntropy: 0.8, edgeDensity: 0.2 };
+    const frame = { top: 0.109, right: 0.143, bottom: 0.164, left: 0.143, strength: 64, sameDirection: true };
+    expect(checkBorder(input({ pixel: { ...pixel, frame } })).level).toBe('pass'); // 5.5 points apart
+    expect(checkBorder(input({ pixel: { ...pixel, frame: { ...frame, right: 0.12, bottom: 0.13, left: 0.12 } } })).level).toBe('warn'); // 2.1 apart
   });
 });
 

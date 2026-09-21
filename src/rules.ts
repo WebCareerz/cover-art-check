@@ -68,6 +68,12 @@ export const EDGE_FAIL = 0.02;
 export const BORDER_WARN = 0.02;
 /** minimum luminance step (0..255) on the weakest side for a print frame to count; a real print frame scores ~158, ordinary covers 2–25 */
 export const FRAME_STEP_MIN = 40;
+/**
+ * How far the four insets may differ before this stops being one frame. A cut sheet of photo paper is the same width
+ * all the way round; 3 points of slack covers a slight tilt. Tightened 2026-09-21 (was: the deepest side within 3× of
+ * the shallowest), which had called a billboard against an open sky a framed print.
+ */
+export const FRAME_SPREAD_MAX = 0.03;
 export const ENTROPY_LOW = 0.35;
 export const EDGE_DENSITY_LOW = 0.03;
 
@@ -319,7 +325,7 @@ export function checkBorder(input: PreflightInput): CheckRow {
   const min = Math.min(b.top, b.right, b.bottom, b.left);
   if (min > BORDER_WARN) {
     const pct = Math.round(min * 100);
-    return { id: 'border', level: 'warn', label: `Even border on all four sides (${pct}%)`, reason: 'A frame or photo-paper border looks like a mockup, and distributors flag mockups.', fix: { kind: 'crop_border', percent: pct } };
+    return { id: 'border', level: 'warn', label: `Even border on all four sides (${pct}%)`, reason: "A frame or photo-paper border makes the cover look like a photo of a print and wastes part of the square. This library's guideline: none of the six platforms rules out borders.", fix: { kind: 'crop_border', percent: pct } };
   }
   // a printed-photo frame: a strong luminance step at a similar depth on all four sides (see pixels.frameInset)
   const f = input.pixel.frame;
@@ -327,9 +333,9 @@ export function checkBorder(input: PreflightInput): CheckRow {
     const insets = [f.top, f.right, f.bottom, f.left];
     const maxIn = Math.max(...insets);
     const minIn = Math.min(...insets);
-    if (minIn >= 0.02 && maxIn <= 0.18 && maxIn <= minIn * 3) {
+    if (f.sameDirection !== false && minIn >= 0.02 && maxIn <= 0.18 && maxIn - minIn <= FRAME_SPREAD_MAX) {
       const pct = Math.ceil(maxIn * 100) + 1;
-      return { id: 'border', level: 'warn', label: `Looks like a framed print (edge about ${Math.round(maxIn * 100)}% in)`, reason: 'A photo-paper or instant-photo frame looks like a mockup, and distributors flag mockups. Crop to the picture.', fix: { kind: 'crop_border', percent: pct } };
+      return { id: 'border', level: 'warn', label: `Looks like a framed print (edge about ${Math.round(maxIn * 100)}% in)`, reason: 'A photo-paper or instant-photo frame makes the cover look like a photo of a print; crop to the picture. This library\'s guideline: none of the six platforms rules out borders or mockups.', fix: { kind: 'crop_border', percent: pct } };
     }
   }
   return { id: 'border', level: 'pass', label: 'Full-bleed image', reason: 'No uniform border or print frame detected.' };
